@@ -15,6 +15,10 @@ export class WebPresentation {
     constructor(private title: Title) { }
 
     /* Public methods */
+    public setPageTitle(title: string) {
+        this.pageTitle = title;
+    }
+
     public changeTitle(subtitle: string) {
         this.subTitle = subtitle;
         this.title.setTitle(this.subTitle + ' | ' + this.pageTitle);
