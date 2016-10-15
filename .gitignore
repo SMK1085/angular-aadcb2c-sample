@@ -1,0 +1,10 @@
+typings
+**/app/**/*.js
+**/app/**/*.map
+app/secrets
+node_modules
+jspm_packages
+bower_components
+
+.vscode
+_test-output
