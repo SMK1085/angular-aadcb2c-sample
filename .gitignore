@@ -1,6 +1,8 @@
 typings
 **/app/**/*.js
 **/app/**/*.map
+**/testing/**/*.js
+**/testing/**/*.map
 app/secrets
 node_modules
 jspm_packages
