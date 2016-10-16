@@ -9,8 +9,8 @@
     "tsc:w": "tsc -w",
     "lint": "tslint ./app/**/*.ts -t verbose",
     "lite": "lite-server --config=liteserver-app-config.json",
-    "test": "tsc && concurrently \"tsc -w\" \"karma start karma.conf.js\"",
-    "test-once": "tsc && karma start karma.conf.js --single-run",
+    "test-conc": "tsc && concurrently \"tsc -w\" \"karma start karma.conf.js\"",
+    "test": "tsc && karma start karma.conf.js --single-run",
     "typings": "typings",
     "postinstall": "typings install"
   },
