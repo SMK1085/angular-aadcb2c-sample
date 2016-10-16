@@ -43,6 +43,23 @@ describe('AadcService without Testbed', () => {
         expect(() => { service = new AadcService(config); }).toThrowError('The domain name "' + config.domainName + '" is not valid. Please correct your configuration.');
     });
 
+    it('throws an error when the policies have no member called signin', () => {
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                foo: 'foo'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access'
+        };
+
+        expect(() => { service = new AadcService(config); }).toThrowError("The policies member must have a property signin with the default signin policy name assigned.");
+    });
+
     it('sets the localStoragePrefix to aadcb2c if null is provided', () => {
         let config: AadcConfig = {
             clientId: '00000000-0000-0000-0000-000000000000',
