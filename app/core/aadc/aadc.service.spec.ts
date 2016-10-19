@@ -168,5 +168,39 @@ describe('AadcService without Testbed', () => {
         expect(config.responseMode).toBe('fragment');
     });
 
+    it('composes the proper url for login', () => {
+
+        let baseUrl: string = 'https://localhost:443';
+        let state: string = 'state';
+        let nonce: string = 'nonce';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + config.clientId +
+            '&response_type=' + config.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + config.redirectUrl) +
+            '&response_mode=' + config.responseMode +
+            '&scope=' + config.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + config.policies.signin;
+
+        
+        service = new AadcService(config);
+        expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.signin)).toBe(url);
+
+        
+    });
 
 });

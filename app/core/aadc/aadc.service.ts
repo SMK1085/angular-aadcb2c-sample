@@ -55,21 +55,13 @@ export class AadcService {
         let p: string = policy ? policy : this.serviceConfig.policies.signin;
         let nonce: string = this.generateGuid();
         let state: string = this.generateGuid();
-        let redirUrl: string = window.location.protocol + '//' + window.location.host + this.serviceConfig.redirectUrl;
+        let baseUrl: string = window.location.protocol + '//' + window.location.host;
 
         // persist the state and nonce in local storage
         this.setNonce(nonce);
         this.setState(state);
 
-        let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
-            '/oauth2/v2.0/authorize?client_id=' + this.serviceConfig.clientId +
-            '&response_type=' + this.serviceConfig.responseMode +
-            '&redirect_uri=' + encodeURIComponent(redirUrl) +
-            '&response_mode=' + this.serviceConfig.responseMode +
-            '&scope=' + this.serviceConfig.scope +
-            '&state=' + encodeURIComponent(state) +
-            '&nonce=' + nonce +
-            '&p=' + p;
+        let url: string = this.getLoginUrl(baseUrl, nonce, state, p);
 
         // Log verbose information before executing the redirect to Azure AD server
         if (this.logger && this.logger.logLevel === 'verbose') {
@@ -77,6 +69,20 @@ export class AadcService {
         }
 
         window.location.assign(url);
+    }
+
+    public getLoginUrl(baseUrl: string, nonce: string, state: string, p: string): string {
+        let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + this.serviceConfig.clientId +
+            '&response_type=' + this.serviceConfig.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + this.serviceConfig.redirectUrl) +
+            '&response_mode=' + this.serviceConfig.responseMode +
+            '&scope=' + this.serviceConfig.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + p;
+
+        return url;
     }
 
     public handleLoginCallback() {
