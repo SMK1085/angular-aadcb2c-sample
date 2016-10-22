@@ -236,4 +236,73 @@ describe('AadcService without Testbed', () => {
         expect(service.getLogoutUrl(redirectUrl, config.policies.signin)).toBe(url);
     });
 
+    it('throws an error when no editprofile policy is present', () => {
+        let baseUrl: string = 'https://localhost:443';
+        let state: string = 'state';
+        let nonce: string = 'nonce';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + config.clientId +
+            '&response_type=' + config.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + config.redirectUrl) +
+            '&response_mode=' + config.responseMode +
+            '&scope=' + config.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + config.policies.signin;
+
+        
+        service = new AadcService(config);
+        expect(() => { service.editProfile(null); }).toThrowError('No policy specified for editing a user profile. Specify a policy either directly or under policies.editProfile in the AadcConfig.');
+    });
+
+    it('composes the proper url for edit profile', () => {
+
+        let baseUrl: string = 'https://localhost:443';
+        let state: string = 'state';
+        let nonce: string = 'nonce';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1',
+                editProfile: 'B2C_1_EditProfile1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + config.clientId +
+            '&response_type=' + config.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + config.redirectUrl) +
+            '&response_mode=' + config.responseMode +
+            '&scope=' + config.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + config.policies.editProfile;
+
+        
+        service = new AadcService(config);
+        expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.editProfile)).toBe(url);
+
+    });
+
 });

@@ -93,7 +93,7 @@ export class AadcService {
         let p: string = policy ? policy : this.serviceConfig.policies.signin;
         let url: string = this.getLogoutUrl(this.serviceConfig.postLogoutUrl, p);
 
-         // Log verbose information before executing the redirect to Azure AD server
+        // Log verbose information before executing the redirect to Azure AD server
         if (this.logger && this.logger.logLevel === 'verbose') {
             this.logger.logInfo('AADC Login: Redirecting to "' + url + '".');
         }
@@ -103,8 +103,52 @@ export class AadcService {
 
     public getLogoutUrl(redirectUrl: string, p: string): string {
         let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
-                            '/oauth2/v2.0/logout?p=' + p +
-                            '&post_logout_redirect_uri=' + encodeURIComponent(redirectUrl);
+            '/oauth2/v2.0/logout?p=' + p +
+            '&post_logout_redirect_uri=' + encodeURIComponent(redirectUrl);
+        return url;
+    }
+
+    public editProfile(policy?: string) {
+        let p: string = policy ? policy : (this.serviceConfig.policies.editProfile ? this.serviceConfig.policies.editProfile : null);
+        // Verify that there is a policy for editing profile present or throw an error
+        if (p === null) {
+            let errMsg: string = 'No policy specified for editing a user profile. Specify a policy either directly or under policies.editProfile in the AadcConfig.';
+            if (this.logger) {
+                let errNoPolicy: Error = new Error(errMsg);
+                this.logger.logError(errNoPolicy);
+            }
+            throw new Error(errMsg);
+        }
+
+        let nonce: string = this.generateGuid();
+        let state: string = window.location.pathname; // store the current url in the state to redirect properly
+        let baseUrl: string = window.location.protocol + '//' + window.location.host;
+
+        // persist the state and nonce in local storage
+        this.setNonce(nonce);
+        this.setState(state);
+
+        let url: string = this.getEditProfileUrl(baseUrl, nonce, state, p);
+
+        // Log verbose information before executing the redirect to Azure AD server
+        if (this.logger && this.logger.logLevel === 'verbose') {
+            this.logger.logInfo('AADC Edit Profile: Redirecting to "' + url + '".');
+        }
+
+        window.location.assign(url);
+    }
+
+    public getEditProfileUrl(baseUrl: string, nonce: string, state: string, p: string) {
+        let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + this.serviceConfig.clientId +
+            '&response_type=' + this.serviceConfig.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + this.serviceConfig.redirectUrl) +
+            '&response_mode=' + this.serviceConfig.responseMode +
+            '&scope=' + this.serviceConfig.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + p;
+
         return url;
     }
 
