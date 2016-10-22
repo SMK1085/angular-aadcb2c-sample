@@ -85,10 +85,6 @@ export class AadcService {
         return url;
     }
 
-    public handleLoginCallback() {
-
-    }
-
     public logout(policy?: string) {
         let p: string = policy ? policy : this.serviceConfig.policies.signin;
         let url: string = this.getLogoutUrl(this.serviceConfig.postLogoutUrl, p);
@@ -150,6 +146,10 @@ export class AadcService {
             '&p=' + p;
 
         return url;
+    }
+
+    public handleLoginCallbackFragment(url: string) {
+        
     }
 
     public clearCache() {
