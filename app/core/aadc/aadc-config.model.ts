@@ -10,4 +10,5 @@ export class AadcConfig {
     policies: any; 
     promptSignIn: string;
     localStoragePrefix: string;
+    postLogoutUrl: string;
 }

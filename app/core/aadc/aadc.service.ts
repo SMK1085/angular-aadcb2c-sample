@@ -89,6 +89,25 @@ export class AadcService {
 
     }
 
+    public logout(policy?: string) {
+        let p: string = policy ? policy : this.serviceConfig.policies.signin;
+        let url: string = this.getLogoutUrl(this.serviceConfig.postLogoutUrl, p);
+
+         // Log verbose information before executing the redirect to Azure AD server
+        if (this.logger && this.logger.logLevel === 'verbose') {
+            this.logger.logInfo('AADC Login: Redirecting to "' + url + '".');
+        }
+
+        window.location.assign(url);
+    }
+
+    public getLogoutUrl(redirectUrl: string, p: string): string {
+        let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
+                            '/oauth2/v2.0/logout?p=' + p +
+                            '&post_logout_redirect_uri=' + encodeURIComponent(redirectUrl);
+        return url;
+    }
+
     public clearCache() {
         this.setNonce('');
         this.setState('');

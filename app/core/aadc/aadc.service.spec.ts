@@ -20,7 +20,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         expect(() => { service = new AadcService(config); }).toThrowError('The client ID "' + config.clientId + '" is not a valid GUID. Please correct your configuration.');
@@ -37,7 +38,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         expect(() => { service = new AadcService(config); }).toThrowError('The domain name "' + config.domainName + '" is not valid. Please correct your configuration.');
@@ -54,7 +56,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         expect(() => { service = new AadcService(config); }).toThrowError("The policies member must have a property signin with the default signin policy name assigned.");
@@ -71,7 +74,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -89,7 +93,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -107,7 +112,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: null,
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -125,7 +131,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: '',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -143,7 +150,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: null,
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -161,7 +169,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: '',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         service = new AadcService(config);
@@ -183,7 +192,8 @@ describe('AadcService without Testbed', () => {
             promptSignIn: 'login',
             redirectUrl: '/auth/signin',
             responseMode: 'fragment',
-            scope: 'openid offline_access'
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
         };
 
         let url: string = 'https://login.microsoftonline.com/' + config.domainName +
@@ -200,7 +210,30 @@ describe('AadcService without Testbed', () => {
         service = new AadcService(config);
         expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.signin)).toBe(url);
 
-        
+    });
+
+    it('composes the proper url for logout', () => {
+        let redirectUrl = 'http://test.io';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+                            '/oauth2/v2.0/logout?p=' + config.policies.signin +
+                            '&post_logout_redirect_uri=' + encodeURIComponent(redirectUrl);
+
+        service = new AadcService(config);
+        expect(service.getLogoutUrl(redirectUrl, config.policies.signin)).toBe(url);
     });
 
 });
