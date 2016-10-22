@@ -1,12 +1,33 @@
-import { AadcService } from './aadc.service';
+import { AadcService, AadcLogger } from './aadc.service';
 import { AadcConfig } from './aadc-config.model';
+import { JwtUtilService } from './aadc-jwtutil.service';
 
 describe('AadcService without Testbed', () => {
 
     let service: AadcService;
 
     it('throws an error when no configuration is provided in the constructor', () => {
-        expect(() => { service = new AadcService(null); }).toThrowError('You need to provide a configuration for the AadcService.');
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        expect(() => { service = new AadcService(null, jwt); }).toThrowError('You need to provide a configuration for the AadcService.');
+    });
+
+    it('throws an error when no jwtutil is passed into the constructor', () => {
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        expect(() => { service = new AadcService(config, null); }).toThrowError('No JWTUtilService injected. Check object passed as jwtUtil.');
     });
 
     it('throws an error when the clientId provided is not a  GUID', () => {
@@ -24,7 +45,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        expect(() => { service = new AadcService(config); }).toThrowError('The client ID "' + config.clientId + '" is not a valid GUID. Please correct your configuration.');
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        expect(() => { service = new AadcService(config, jwt); }).toThrowError('The client ID "' + config.clientId + '" is not a valid GUID. Please correct your configuration.');
     });
 
     it('throws an error when the domainName provided is not valid domain', () => {
@@ -42,7 +65,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        expect(() => { service = new AadcService(config); }).toThrowError('The domain name "' + config.domainName + '" is not valid. Please correct your configuration.');
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        expect(() => { service = new AadcService(config, jwt); }).toThrowError('The domain name "' + config.domainName + '" is not valid. Please correct your configuration.');
     });
 
     it('throws an error when the policies have no member called signin', () => {
@@ -60,7 +85,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        expect(() => { service = new AadcService(config); }).toThrowError("The policies member must have a property signin with the default signin policy name assigned.");
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        expect(() => { service = new AadcService(config, jwt); }).toThrowError("The policies member must have a property signin with the default signin policy name assigned.");
     });
 
     it('sets the localStoragePrefix to aadcb2c if null is provided', () => {
@@ -78,7 +105,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.localStoragePrefix).toBe('aadcb2c');
     });
 
@@ -97,7 +126,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.localStoragePrefix).toBe('aadcb2c');
     });
 
@@ -116,7 +147,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.promptSignIn).toBe('login');
     });
 
@@ -135,7 +168,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.promptSignIn).toBe('login');
     });
 
@@ -154,7 +189,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.responseMode).toBe('fragment');
     });
 
@@ -173,7 +210,9 @@ describe('AadcService without Testbed', () => {
             postLogoutUrl: 'http://test.io'
         };
 
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(config.responseMode).toBe('fragment');
     });
 
@@ -205,9 +244,10 @@ describe('AadcService without Testbed', () => {
             '&state=' + encodeURIComponent(state) +
             '&nonce=' + nonce +
             '&p=' + config.policies.signin;
-
         
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+        
+        service = new AadcService(config, jwt);
         expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.signin)).toBe(url);
 
     });
@@ -231,8 +271,10 @@ describe('AadcService without Testbed', () => {
         let url: string = 'https://login.microsoftonline.com/' + config.domainName +
                             '/oauth2/v2.0/logout?p=' + config.policies.signin +
                             '&post_logout_redirect_uri=' + encodeURIComponent(redirectUrl);
+        
+        let jwt: JwtUtilService = new JwtUtilService();
 
-        service = new AadcService(config);
+        service = new AadcService(config, jwt);
         expect(service.getLogoutUrl(redirectUrl, config.policies.signin)).toBe(url);
     });
 
@@ -265,7 +307,9 @@ describe('AadcService without Testbed', () => {
             '&p=' + config.policies.signin;
 
         
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(() => { service.editProfile(null); }).toThrowError('No policy specified for editing a user profile. Specify a policy either directly or under policies.editProfile in the AadcConfig.');
     });
 
@@ -300,9 +344,90 @@ describe('AadcService without Testbed', () => {
             '&p=' + config.policies.editProfile;
 
         
-        service = new AadcService(config);
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
         expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.editProfile)).toBe(url);
 
     });
 
+
+    it('logs an info message when the hash passed does not have an id_token property present', () => {
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let jwt: JwtUtilService = new JwtUtilService();
+        let logger = new LoggerFake('verbose');
+
+        let hashFragment = 'x=foo';
+
+        service = new AadcService(config, jwt, logger);
+        service.handleLoginCallbackFragment(hashFragment);
+
+        expect(logger.infoMsg).toBe('The parsed repsonse does not contain an id_token; not a login request.');
+    });
+
+    it('logs an info message with the parsed response properties when the hash represents a valid AD response', () => {
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let jwt: JwtUtilService = new JwtUtilService();
+        let logger = new LoggerFake('verbose');
+
+        let hashFragment = 'id_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1Q&code=AwABAAAAvPM1KaPlrEqdFSBzjqfTGBCmLdgfSTLEMPGYuNHSUYBrq&state=arbitrary_data';
+        let expectedMsg = 'The parsed repsonse contains the following parameters: {"id_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik5HVEZ2ZEstZnl0aEV1Q","code":"AwABAAAAvPM1KaPlrEqdFSBzjqfTGBCmLdgfSTLEMPGYuNHSUYBrq","state":"arbitrary_data"}';
+        
+        service = new AadcService(config, jwt, logger);
+        service.handleLoginCallbackFragment(hashFragment);
+
+        expect(logger.infoMsg).toBe(expectedMsg);
+    });
+
 });
+
+
+class LoggerFake implements AadcLogger {
+
+    /* Public properties */
+    public logLevel: string;
+    public infoMsg: string;
+    public warnMsg: string;
+    public errObj: Error;
+
+    constructor(loggingLevel: string){
+        this.logLevel = loggingLevel;
+    }
+
+    logInfo(message: string) {
+        this.infoMsg = message;
+    }
+    logWarning(message: string) {
+        this.warnMsg = message;
+    }
+    logError(err: Error) {
+        this.errObj = err;
+    }
+}
+

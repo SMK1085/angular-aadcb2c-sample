@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 
-/* Data structures */
+/* Dependencies */
 import { AadcConfig } from './aadc-config.model';
+import { JwtUtilService } from './aadc-jwtutil.service';
 
 @Injectable()
 export class AadcService {
@@ -13,7 +14,7 @@ export class AadcService {
     private serviceConfig: AadcConfig;
 
     /* Ctor */
-    constructor(config: AadcConfig, private logger?: AadcLogger) {
+    constructor(config: AadcConfig, private jwtUtil: JwtUtilService, private logger?: AadcLogger) {
         if (config) {
             // validate the provided config
             let regexClientID = /\b[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}\b/;
@@ -47,6 +48,10 @@ export class AadcService {
 
         } else {
             throw new Error('You need to provide a configuration for the AadcService.');
+        }
+
+        if(!this.jwtUtil) {
+            throw new Error('No JWTUtilService injected. Check object passed as jwtUtil.');
         }
     }
 
@@ -148,8 +153,23 @@ export class AadcService {
         return url;
     }
 
-    public handleLoginCallbackFragment(url: string) {
-        
+    public handleLoginCallbackFragment(urlFragment: string) {
+        let parsedResponse: any = this.parseFragmentResponse(urlFragment);
+
+        if(parsedResponse.id_token) {
+            if(this.logger && this.logger.logLevel === 'verbose') {
+                this.logger.logInfo('The parsed repsonse contains the following parameters: ' + JSON.stringify(parsedResponse));
+            }
+
+            // proceed to validate the token
+
+        } else {
+            // do nothing here, so we can always call the callback
+            if(this.logger && this.logger.logLevel === 'verbose') {
+                this.logger.logInfo('The parsed repsonse does not contain an id_token; not a login request.')
+            }
+        }
+
     }
 
     public clearCache() {
@@ -276,6 +296,18 @@ export class AadcService {
             hex = '0' + hex;
         }
         return hex;
+    }
+
+    private parseFragmentResponse(fragment: string): any {
+        let entries = fragment.split('&');
+        let parsed: any = {};
+
+        entries.forEach(elmt => {
+            let elmtParts: string[] = elmt.split('=');
+            parsed[elmtParts[0]] = elmtParts[1];
+        });
+
+        return parsed;
     }
 }
 
