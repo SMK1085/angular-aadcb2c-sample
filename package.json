@@ -4,7 +4,7 @@
   "description": "Azure AD B2C sample application for Angular",
   "main": "app/app.ts",
   "scripts": {
-    "start": "concurrently \"npm run tsc:w\" \"npm run lite\"",
+    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" \"node api\\server.js \"",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
     "lint": "tslint ./app/**/*.ts -t verbose",
@@ -52,7 +52,10 @@
     "reflect-metadata": "^0.1.8",
     "rxjs": "5.0.0-beta.12",
     "zone.js": "^0.6.25",
-    "es6-shim": "^0.35.1"
+    "es6-shim": "^0.35.1",
+    "express": "^4.14.0",
+    "jsonwebtoken": "^7.1.9",
+    "request": "^2.75.0"
   },
   "devDependencies": {
     "codelyzer": "^1.0.0-beta.2",

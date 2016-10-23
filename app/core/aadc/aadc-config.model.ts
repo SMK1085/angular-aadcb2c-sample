@@ -11,4 +11,14 @@ export class AadcConfig {
     promptSignIn: string;
     localStoragePrefix: string;
     postLogoutUrl: string;
+    logger: AadcLogger;
+}
+
+export interface AadcLogger {
+
+    logLevel: string;
+
+    logInfo(message: string);
+    logWarning(message: string);
+    logError(err: Error);
 }

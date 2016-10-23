@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 /* Dependencies */
-import { AadcConfig } from './aadc-config.model';
+import { AadcConfig, AadcLogger } from './aadc-config.model';
 import { JwtUtilService } from './aadc-jwtutil.service';
 
 @Injectable()
@@ -12,9 +12,10 @@ export class AadcService {
     }
 
     private serviceConfig: AadcConfig;
+    private logger: AadcLogger = null;
 
     /* Ctor */
-    constructor(config: AadcConfig, private jwtUtil: JwtUtilService, private logger?: AadcLogger) {
+    constructor(config: AadcConfig, private jwtUtil: JwtUtilService) {
         if (config) {
             // validate the provided config
             let regexClientID = /\b[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}\b/;
@@ -42,6 +43,10 @@ export class AadcService {
 
             if (config.responseMode === null || config.responseMode.length < 1) {
                 config.responseMode = 'fragment';
+            }
+
+            if(config.logger) {
+                this.logger = config.logger;
             }
 
             this.serviceConfig = config;
@@ -169,7 +174,14 @@ export class AadcService {
                 this.logger.logInfo('The parsed repsonse contains the following parameters: ' + JSON.stringify(parsedResponse));
             }
 
-            // proceed to validate the token
+            // Validating the token includes the following steps:
+            // 1 - Load the RSA 256 public keys from the metadata endpoint to validate the signature
+            // 2 - Validate the token signature
+            // 3 - Verify nonce, aud, iat and exp claims
+
+            // After validation proceed with redirect
+
+
 
         } else {
             // do nothing here, so we can always call the callback
@@ -317,14 +329,4 @@ export class AadcService {
 
         return parsed;
     }
-}
-
-
-export interface AadcLogger {
-
-    logLevel: string;
-
-    logInfo(message: string);
-    logWarning(message: string);
-    logError(err: Error);
 }

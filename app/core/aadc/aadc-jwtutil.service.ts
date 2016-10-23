@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { Observable } from 'rxjs/Rx';
 
 @Injectable()
 export class JwtUtilService {
@@ -6,7 +8,9 @@ export class JwtUtilService {
     /* Private fields */
     private jwtSeparator: string = '.';
 
-    constructor() { }
+    constructor(private http: Http) {
+
+     }
 
     /* Public methods */
     public decodeUrlBase64(encoded: string): string {
@@ -55,6 +59,19 @@ export class JwtUtilService {
         return this.extractTokenPart(token, 2);
     }
 
+    public getRsaPublicKeys(domainName: string, policy: string): Observable<RsaPublicKey[]> {
+        // Note: At the moment the MS discovery endpoint cannot handle CORS properly,
+        //       therefore this call needs to be submitted to a local API that 
+        //       calls the discovery endpoint from the server-side:
+        let url: string = 'http://localhost:8701/discovery/keys?d=' + domainName +
+                            '&p=' + policy;
+                            
+        return this.http.get(url)
+                        .map(this.mapRsaPublicKeysResponse)
+                        .catch(this.handleHttpError);
+    }
+
+
     /* Private methods */
     private splitTokenString(token: string, separator: string): string[] {
         return token.split(separator);
@@ -69,4 +86,25 @@ export class JwtUtilService {
 
         return parts[partNo];
     }
+
+    private mapRsaPublicKeysResponse(res: Response): RsaPublicKey[] {
+        let body: any = JSON.parse(res.json());
+        return body.keys ? body.keys : [] as RsaPublicKey[];
+    }
+
+    private handleHttpError(error: any) {
+         let errMsg = (error.message) ? error.message :
+            error.status ? `${error.status} - ${error.statusText}` :
+                'Server error';
+        return Observable.throw(errMsg);
+    }
+}
+
+export interface RsaPublicKey {
+    kid: string;
+    use: string;
+    kty: string;
+    e: string;
+    n: string;
+    nbf?:string;
 }
