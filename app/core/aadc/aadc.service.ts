@@ -56,7 +56,7 @@ export class AadcService {
     }
 
     /* Public methods */
-    public login(policy?: string) {
+    public login(policy?: string, prompt?: string) {
         let p: string = policy ? policy : this.serviceConfig.policies.signin;
         let nonce: string = this.generateGuid();
         let state: string = this.generateGuid();
@@ -66,7 +66,7 @@ export class AadcService {
         this.setNonce(nonce);
         this.setState(state);
 
-        let url: string = this.getLoginUrl(baseUrl, nonce, state, p);
+        let url: string = this.getLoginUrl(baseUrl, nonce, state, p, prompt);
 
         // Log verbose information before executing the redirect to Azure AD server
         if (this.logger && this.logger.logLevel === 'verbose') {
@@ -76,7 +76,7 @@ export class AadcService {
         window.location.assign(url);
     }
 
-    public getLoginUrl(baseUrl: string, nonce: string, state: string, p: string): string {
+    public getLoginUrl(baseUrl: string, nonce: string, state: string, p: string, prompt?: string): string {
         let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
             '/oauth2/v2.0/authorize?client_id=' + this.serviceConfig.clientId +
             '&response_type=' + this.serviceConfig.responseMode +
@@ -86,6 +86,10 @@ export class AadcService {
             '&state=' + encodeURIComponent(state) +
             '&nonce=' + nonce +
             '&p=' + p;
+        
+        if(prompt) {
+            url += ('&prompt=' + prompt);
+        }
 
         return url;
     }
@@ -109,7 +113,7 @@ export class AadcService {
         return url;
     }
 
-    public editProfile(policy?: string) {
+    public editProfile(policy?: string, prompt?: string) {
         let p: string = policy ? policy : (this.serviceConfig.policies.editProfile ? this.serviceConfig.policies.editProfile : null);
         // Verify that there is a policy for editing profile present or throw an error
         if (p === null) {
@@ -129,7 +133,7 @@ export class AadcService {
         this.setNonce(nonce);
         this.setState(state);
 
-        let url: string = this.getEditProfileUrl(baseUrl, nonce, state, p);
+        let url: string = this.getEditProfileUrl(baseUrl, nonce, state, p, prompt);
 
         // Log verbose information before executing the redirect to Azure AD server
         if (this.logger && this.logger.logLevel === 'verbose') {
@@ -139,7 +143,7 @@ export class AadcService {
         window.location.assign(url);
     }
 
-    public getEditProfileUrl(baseUrl: string, nonce: string, state: string, p: string) {
+    public getEditProfileUrl(baseUrl: string, nonce: string, state: string, p: string, prompt?: string) {
         let url: string = 'https://login.microsoftonline.com/' + this.serviceConfig.domainName +
             '/oauth2/v2.0/authorize?client_id=' + this.serviceConfig.clientId +
             '&response_type=' + this.serviceConfig.responseMode +
@@ -149,6 +153,10 @@ export class AadcService {
             '&state=' + encodeURIComponent(state) +
             '&nonce=' + nonce +
             '&p=' + p;
+
+        if(prompt) {
+            url += ('&prompt=' + prompt);
+        }
 
         return url;
     }

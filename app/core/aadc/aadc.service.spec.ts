@@ -252,6 +252,44 @@ describe('AadcService without Testbed', () => {
 
     });
 
+    it('composes the proper url for login with prompt', () => {
+
+        let baseUrl: string = 'https://localhost:443';
+        let state: string = 'state';
+        let nonce: string = 'nonce';
+        let prompt: string = 'login';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + config.clientId +
+            '&response_type=' + config.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + config.redirectUrl) +
+            '&response_mode=' + config.responseMode +
+            '&scope=' + config.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + config.policies.signin +
+            '&prompt=' + prompt;
+        
+        let jwt: JwtUtilService = new JwtUtilService();
+        
+        service = new AadcService(config, jwt);
+        expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.signin, prompt)).toBe(url);
+
+    });
+
     it('composes the proper url for logout', () => {
         let redirectUrl = 'http://test.io';
         let config: AadcConfig = {
@@ -348,6 +386,46 @@ describe('AadcService without Testbed', () => {
 
         service = new AadcService(config, jwt);
         expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.editProfile)).toBe(url);
+
+    });
+
+    it('composes the proper url for edit profile with prompt', () => {
+
+        let baseUrl: string = 'https://localhost:443';
+        let state: string = 'state';
+        let nonce: string = 'nonce';
+        let prompt: string = 'login';
+        let config: AadcConfig = {
+            clientId: '00000000-0000-0000-0000-000000000000',
+            domainName: 'testb2c.onmicrosoft.com',
+            localStoragePrefix: 'testb2c',
+            policies: {
+                signin: 'B2C_1_SignIn1',
+                editProfile: 'B2C_1_EditProfile1'
+            },
+            promptSignIn: 'login',
+            redirectUrl: '/auth/signin',
+            responseMode: 'fragment',
+            scope: 'openid offline_access',
+            postLogoutUrl: 'http://test.io'
+        };
+
+        let url: string = 'https://login.microsoftonline.com/' + config.domainName +
+            '/oauth2/v2.0/authorize?client_id=' + config.clientId +
+            '&response_type=' + config.responseMode +
+            '&redirect_uri=' + encodeURIComponent(baseUrl + config.redirectUrl) +
+            '&response_mode=' + config.responseMode +
+            '&scope=' + config.scope +
+            '&state=' + encodeURIComponent(state) +
+            '&nonce=' + nonce +
+            '&p=' + config.policies.editProfile +
+            '&prompt=' + prompt;
+
+        
+        let jwt: JwtUtilService = new JwtUtilService();
+
+        service = new AadcService(config, jwt);
+        expect(service.getLoginUrl(baseUrl, nonce, state, config.policies.editProfile, prompt)).toBe(url);
 
     });
 
