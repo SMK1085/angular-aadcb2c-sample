@@ -46,7 +46,7 @@
     "@angular/platform-browser-dynamic": "~2.1.0",
     "@angular/router": "~3.1.0",
     "@angular/upgrade": "~2.1.0",
-    "bootstrap": "4.0.0-alpha.4",
+    "bootstrap": "4.0.0",
     "systemjs": "0.19.39",
     "core-js": "^2.4.1",
     "reflect-metadata": "^0.1.8",
